@@ -1,52 +1,80 @@
 import React from 'react';
-import { Text, StyleSheet, View, TouchableOpacity, Image, Alert, ScrollView } from 'react-native';
+import { Text, StyleSheet, View, TouchableOpacity, Image, Alert, ScrollView, Dimensions } from 'react-native';
 import {HeaderBackButton} from 'react-navigation-stack'
-
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useKeepAwake } from 'expo-keep-awake';
 
 interface Props {
   navigation: any,
   route: any,
 }
 
+const KeepAwake = () => {
+  useKeepAwake();
+  return null;
+};
 
 const AUTORENDER = true;
 
 export default class Explain_Tree extends React.Component<Props> {
   rafID?: number;
+
+  state={
+    dark: 'false',
+  }
+
   headerStyle = () => {
     this.props.navigation.setOptions({
         headerRight: () => (
           <TouchableOpacity
-            style={{backgroundColor: '#6B98FF'}}
+
             onPress={() => 
               Alert.alert(
                 '도움말','나무 자세에 대한 자세한 설명을 제공하는 페이지입니다. 나무 자세에 대한 설명을 통해 정확한 자세를 익혀보세요.',
                 [{ text: "확인" }]
               )}
-            //color="green"
+            
             accessibilityLabel='도움말'
           >
             <Image 
             style={{width: 30, height: 30, marginRight:10}}
-            source={require('../../../assets/icons/help.png')} />
+ source={this.state.dark=='false'?require('../../../assets/icons/help_black.png'):require('../../../assets/icons/help_yellow.png')} />
           </TouchableOpacity>
         )
         
     })
   }
+
+  UNSAFE_componentWillMount(){
+    AsyncStorage.getItem('dark', (err, result) => {
+      if (result == null) {
+        this.setState({dark:'false'})
+      } else {
+        this.setState({dark:result})
+      }
+    })
+  }
+
+
   render() {
     this.headerStyle();
+
     return (
-      <ScrollView style={styles.mainContainer} bounces={true}>
+      <ScrollView style={this.state.dark=='false'?styles.mainContainer:styles.mainContainer_dark} bounces={true}>
+        <KeepAwake />
+        <Image
+            resizeMode='contain'
+            style={{ width: Dimensions.get('window').width*0.9, 
+            height: Dimensions.get('window').height*0.3, alignSelf:'center', marginTop:5,marginBottom:1}}
+            source={require('../../../assets/icons/tree.png')} />
           <View style={styles.sectionContainer}>
-            <Text style={{fontSize:20, fontWeight:'700'}}>운동 설명설명1</Text>
+            <Text style={{fontSize:20, fontWeight:'700'}}>두 손바닥을 가슴위로 모아주세요. </Text>
           </View>
           <View style={styles.sectionContainer}>
-            <Text style={{fontSize:20, fontWeight:'700'}}>운동 설명설명2</Text>
+            <Text style={{fontSize:20, fontWeight:'700'}}>한쪽다리를 옆으로 접어 한쪽 발과 다른쪽의 허벅지와 맞닿게 해주세요.</Text>
           </View>
           <View style={styles.sectionContainer}>
-            <Text style={{fontSize:20, fontWeight:'700'}}>운동 설명설명3</Text>
+            <Text style={{fontSize:20, fontWeight:'700'}}>20초 후, 들어올리는 발을 바꾸어 총 40초 동안 나무자세를 유지합니다.</Text>
           </View>
           
       </ScrollView>
@@ -56,14 +84,15 @@ export default class Explain_Tree extends React.Component<Props> {
 }
 
 const styles = StyleSheet.create({
-  // sectionContainer: {
-  //   marginTop: 32,
-  //   paddingHorizontal: 24,
-  // },
   mainContainer: {
     height: '100%',
-    backgroundColor: '#CEEAE2',
-    //justifyContent:'center',   
+    backgroundColor: '#ddf7f7',
+      
+  },
+  mainContainer_dark: {
+    height: '100%',
+    backgroundColor: '#434248',
+      
   },
   sectionContainer: {
     backgroundColor: 'white',

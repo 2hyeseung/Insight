@@ -1,8 +1,6 @@
 import React from 'react';
 import { Text, StyleSheet, ScrollView, View, TouchableOpacity, Image, Alert, Switch, Linking } from 'react-native';
-import Audio from 'expo-av';
-import { moderateScale } from 'react-native-size-matters';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface Props {
   navigation: any,
@@ -14,31 +12,46 @@ const AUTORENDER = true;
 
 export default class Service_info extends React.Component<Props> {
   rafID?: number;
-  
+
+  state={
+    dark: 'false',
+  }
+
   headerStyle = () => {
     this.props.navigation.setOptions({
         headerRight: () => (
           <TouchableOpacity
-            style={{backgroundColor: '#6B98FF'}}
+
             onPress={() => 
               Alert.alert(
                 '도움말','\n현재 페이지는 [설정]-[개인정보 처리방침] 페이지 입니다. 개인정보 수집 내역 및 처리 방침에 대해 안내합니다.',
                 [{ text: "확인" }],
               )}
-            //color="green"
+            
             accessibilityLabel='도움말'
           >
             <Image 
             style={{width: 30, height: 30, marginRight:10}}
-            source={require('../../../assets/icons/help.png')} />
+ source={this.state.dark=='false'?require('../../../assets/icons/help_black.png'):require('../../../assets/icons/help_yellow.png')} />
           </TouchableOpacity>
         )
+    })
+  }
+
+  UNSAFE_componentWillMount(){
+    AsyncStorage.getItem('dark', (err, result) => {
+      if (result == null) {
+        this.setState({dark:'false'})
+      } else {
+        this.setState({dark:result})
+      }
     })
   }
 
   
   render() {
     this.headerStyle();
+
     return (
       <ScrollView style={styles.mainContainer}>
         <View style={styles.subContainer}>
@@ -70,7 +83,7 @@ export default class Service_info extends React.Component<Props> {
 ① 'INSIGHT'는 개인정보 처리에 관한 업무를 총괄해서 책임지고, 개인정보 처리와 관련한 정보주체의 불만처리 및 피해구제 등을 위하여 아래와 같이 개인정보 보호 담당부서를 지정하고 있습니다.{"\n"}
 ▶ 개인정보 보호 담당부서{"\n"}
 부서명 : 에너자이저{"\n"}
-연락처 : energEYEzer@gmail.com{"\n"}
+연락처 : energeyezer@gmail.com{"\n"}
 {"\n"}
 ② 정보주체께서는 'INSIGHT'의 서비스를 이용하시면서 발생한 모든 개인정보 보호 관련 문의, 불만처리, 피해구제 등에 관한 사항을 개인정보 보호책임자 및 담당부서로 문의하실 수 있습니다. 'INSIGHT'는 정보주체의 문의에 대해 지체 없이 답변 및 처리해드릴 것입니다.{"\n"}
 {"\n"}
@@ -105,7 +118,7 @@ const styles = StyleSheet.create({
   mainContainer: {
     height: '100%',
     backgroundColor: 'white',
-    //justifyContent:'center',   
+      
   },
   subContainer: {
     backgroundColor: 'white',

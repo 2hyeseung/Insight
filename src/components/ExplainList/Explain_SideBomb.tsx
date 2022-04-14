@@ -1,8 +1,8 @@
 import React from 'react';
 import { Text, StyleSheet, View, TouchableOpacity, Image, Alert, ScrollView } from 'react-native';
 import {HeaderBackButton} from 'react-navigation-stack'
-
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useKeepAwake } from 'expo-keep-awake';
 
 interface Props {
   navigation: any,
@@ -12,43 +12,69 @@ interface Props {
 
 const AUTORENDER = true;
 
+const KeepAwake = () => {
+  useKeepAwake();
+  return null;
+};
+
 export default class Explain_SideBomb extends React.Component<Props> {
   rafID?: number;
+
+  state={
+    dark: 'false',
+  }
+
   headerStyle = () => {
     this.props.navigation.setOptions({
         headerRight: () => (
           <TouchableOpacity
-            style={{backgroundColor: '#6B98FF'}}
+
             onPress={() => 
               Alert.alert(
                 '도움말','사이드 밤 동작에 대한 자세한 설명을 제공하는 페이지입니다. 사이드 밤에 대한 설명을 통해 정확한 자세를 익혀보세요.',
                 [{ text: "확인" }]
               )}
-            //color="green"
+            
             accessibilityLabel='도움말'
           >
             <Image 
             style={{width: 30, height: 30, marginRight:10}}
-            source={require('../../../assets/icons/help.png')} />
+ source={this.state.dark=='false'?require('../../../assets/icons/help_black.png'):require('../../../assets/icons/help_yellow.png')} />
           </TouchableOpacity>
         )
         
     })
   }
+
+  UNSAFE_componentWillMount(){
+    AsyncStorage.getItem('dark', (err, result) => {
+      if (result == null) {
+        this.setState({dark:'false'})
+      } else {
+        this.setState({dark:result})
+      }
+    })
+  }
+
+
   render() {
     this.headerStyle();
+
+
     return (
-      <ScrollView style={styles.mainContainer} bounces={true}>
+      <ScrollView style={this.state.dark=='false'?styles.mainContainer:styles.mainContainer_dark} bounces={true}>
+        <KeepAwake />
           <View style={styles.sectionContainer}>
-            <Text style={{fontSize:20, fontWeight:'700'}}>운동 설명설명1</Text>
-          </View>
-          <View style={styles.sectionContainer}>
-            <Text style={{fontSize:20, fontWeight:'700'}}>운동 설명설명2</Text>
-          </View>
-          <View style={styles.sectionContainer}>
-            <Text style={{fontSize:20, fontWeight:'700'}}>운동 설명설명3</Text>
+            <Text style={{fontSize:20, fontWeight:'700'}}>정면을 보고 바르게 서주세요.</Text>
           </View>
           
+          <View style={styles.sectionContainer}>
+            <Text style={{fontSize:20, fontWeight:'700'}}> 오른쪽 손을 머리 위에 올리고, 왼쪽 팔과 다리는 옆으로 45도 정도 들어주세요.</Text>
+          </View>
+
+          <View style={styles.sectionContainer}>
+            <Text style={{fontSize:20, fontWeight:'700'}}>오른쪽 한 발로 중심을 잡고 서야합니다. 다음으로 반대쪽도 똑같이 해주세요. </Text>
+          </View>
       </ScrollView>
     );
   }
@@ -56,14 +82,15 @@ export default class Explain_SideBomb extends React.Component<Props> {
 }
 
 const styles = StyleSheet.create({
-  // sectionContainer: {
-  //   marginTop: 32,
-  //   paddingHorizontal: 24,
-  // },
   mainContainer: {
     height: '100%',
-    backgroundColor: '#CEEAE2',
-    //justifyContent:'center',   
+    backgroundColor: '#ddf7f7',
+      
+  },
+  mainContainer_dark: {
+    height: '100%',
+    backgroundColor: '#434248',
+      
   },
   sectionContainer: {
     backgroundColor: 'white',
